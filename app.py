@@ -1,11 +1,11 @@
 import os
 import json
-import pandas as pd 
+import pandas as pd
+from dotenv import load_dotenv
 from geopy.geocoders import Nominatim
 
 #Output Data with Columns
-agg_ins_data={'state':[],'year':[], 'quarter':[], 'payment_category':[],'count':[],'amount':[]}
-
+agg_ins_data={'state':[],'year':[], 'quarter':[], 'payment_category':[],'count':[],'amount':[]} #create empty dict
 #Path to be specified to retrieve Data
 data_agg_path1 = r"C:\Users\sripe\OneDrive\Desktop\Phone_Pay\pulse\data\aggregated\insurance\country\india\state"
 #Converting to Dict
@@ -28,7 +28,7 @@ for state in data_agg_list1:
 #Loop to Iterate into JSON to get the required Columns and its Data
             for i in data['data']['transactionData']:
                 Payment_Category=i['name']
-                count=i['paymentInstruments'][0]['count']
+                count=i['paymentInstruments'][0]['count'] #first one is dict, others are list
                 amount=i['paymentInstruments'][0]['amount']
                 agg_ins_data['state'].append(state)
                 agg_ins_data['year'].append(int(year))
@@ -41,11 +41,11 @@ for state in data_agg_list1:
 #Converting this Data into DataFrame using Pandas
 agg_ins_data_df=pd.DataFrame(agg_ins_data)
 
-geolocator=Nominatim(user_agent="Agg_Ins_Map")
+geolocator=Nominatim(user_agent="Agg_Ins_Map") #Nominatiom converts plcae name to lat and lon, # user agent is an Identifier
 
 state_lat_long = {'state': [], 'lat': [], 'lon': []}
 for i in agg_ins_data_df['state'].unique():
-    location=geolocator.geocode(i)
+    location=geolocator.geocode(i) #find lat, lon
     lat=location.latitude
     lon=location.longitude
     state_lat_long['state'].append(i)
@@ -139,11 +139,10 @@ for state in data_agg_list3:
                 
 #method2 
                 registered_users=data['data']['aggregated']['registeredUsers']
-                #if 'usersByDevice' in data['data']and isinstance(data['data']['usersByDevice'], list):
                 if data['data'].get('usersByDevice'):
                     device_list = data['data']['usersByDevice']
                 else:
-                    device_list = [{'brand': 'unknown', 'count': 0}]
+                    device_list = [{'brand': 'unknown', 'count': 0}] #to avoid key error
 
                 for i in device_list:
                     agg_user_data['state'].append(state)
@@ -201,8 +200,8 @@ for state in data_map_list1:
                 #print(data)
 
                 District_data=data['data']['data']['data']
-                for i in District_data:
-                    latitude=i[0]
+                for i in District_data: #“In the JSON, each row is an array [lat, lon, metric, label]. 
+                    latitude=i[0] #So in Python, we use i[0], i[1], i[2], i[3] to extract latitude, longitude, metric, and district name respectively.”
                     longitude=i[1]
                     metric=i[2]
                     label=i[3]
@@ -344,7 +343,6 @@ map_trans_data_df=pd.merge(map_trans_data_df,state,on='state')
 map_trans_data_df.to_csv("data/map_transaction.csv", index=False)
 #print(map_trans_data_df)
 #----------------------------------------------------------------------------------------------------------------------------------
-
 #Output Data with Columns
 map_user_data={'state':[],'year':[], 'quarter':[], 'district_name':[],'registered_users':[],'app_opens':[]}
 
@@ -426,7 +424,7 @@ for state in top_ins_list1:
             try:
                 with open(path, 'r') as f:
                     data = json.load(f)
-
+                    #It fills missing values, prevents from crashing or empty DF by filling default values automatically
                     state_name = data['data'].get('states') or [{'entityName': 'NA', 'metric': {}}]
                     district_name = data['data'].get('districts') or [{'entityName':'NA','metric':{}}]
                     pincode_name = data['data'].get('pincodes') or [{'entityName':'NA','metric':{}}]
@@ -459,8 +457,7 @@ for state in top_ins_list1:
                                 top_ins_data['pincode'].append(str(pincode))
                                 top_ins_data['p_count'].append(int(p_count))
                                 top_ins_data['p_amount'].append(float(p_amount))
-
-                         
+                 
             except Exception as e:
                 print(f"Skipped file: {path} due to error: {e}")
 
@@ -507,8 +504,8 @@ for state in top_trans_list2:
                 with open(path, 'r') as f:
                     data = json.load(f)
                     #print(data)
-
-                    State_data=data['data'].get('states') or [{'entityName': 'NA', 'metric': {}}] #It fills missing values, prevents from crashing or empty DF by filling default values automatically
+         #It fills missing values, prevents from crashing or empty DF by filling default values automatically
+                    State_data=data['data'].get('states') or [{'entityName': 'NA', 'metric': {}}] 
                     District_data=data['data'].get('districts') or [{'entityName': 'NA', 'metric': {}}]
                     Pincode_data=data['data'].get('pincodes') or [{'entityName': 'NA', 'metric': {}}]
                     for i in State_data:
@@ -641,13 +638,22 @@ top_user_data_df.to_csv("data/top_user.csv", index=False)
 from sqlalchemy import create_engine
 import psycopg2
 
+load_dotenv()
+
+# Get credentials from .env
+DB_HOST = os.getenv("DB_HOST")
+DB_USER = os.getenv("DB_USER")
+DB_PASS = os.getenv("DB_PASS")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
+
 #Establishing the connection between Py and SQL
-conn=psycopg2.connect(
-    database="postgres",
-    user="postgres",
-    password="281299",
-    host="localhost",
-    port="5432")
+conn = psycopg2.connect(
+    host=DB_HOST,
+    user=DB_USER,
+    password=DB_PASS,
+    port=DB_PORT
+)
 
 #cursor is used to execute commands in SQL
 cur = conn.cursor()
@@ -660,13 +666,12 @@ cur.execute(f"CREATE DATABASE {new_db_name}")
 #Connecting New DB
 conn=psycopg2.connect(
     database="phone_pe",
-    user="postgres",
-    password="281299",
-    host="localhost",
-    port="5432"
+    host=DB_HOST,
+    user=DB_USER,
+    password=DB_PASS,
+    port=DB_PORT
 )
 cur = conn.cursor()
-
 
 #Creating new table - Agg Insurance
 create_table='''
@@ -843,10 +848,8 @@ CREATE TABLE IF NOT EXISTS top_user_data(
 cur.execute(create_table)
 conn.commit()
 
-
-
 #Create SQLAlchemy engine to connect Dataframe with SQL
-engine = create_engine(f"postgresql+psycopg2://postgres:281299@localhost:5432/phone_pe")
+engine = create_engine(f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 agg_ins_data_df.to_sql(name="agg_insurance_data",con=engine,if_exists="append",index=False)
 agg_trans_data_df.to_sql(name="agg_transaction_data",con=engine,if_exists="append",index=False)
 agg_user_data_df.to_sql(name="agg_user_data",con=engine,if_exists="append",index=False)

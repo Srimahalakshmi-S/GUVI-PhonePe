@@ -16,24 +16,8 @@ Average Transaction Value (ATV) insights
 
 Interactive Visualizations using Plotly & Streamlit
 
-📂 Project Structure
-MY_PHONE_PE
-│── Data/                         # All CSV datasets
-│   ├── agg_insurance.csv
-│   ├── agg_transactions.csv
-│   ├── agg_users.csv
-│   ├── map_insurance.csv
-│   ├── map_transaction.csv
-│   ├── map_user.csv
-│   ├── maphovr_insurance.csv
-│   ├── top_insurance.csv
-│   ├── top_transaction.csv
-│   └── top_user.csv
-│
-│── app.py                        # Main app script
-│── Dashboard.py                  # Streamlit dashboard
-│── requirements.txt              # Dependencies
-│── .env                          # Environment variables (DB credentials if any)
+<img width="720" height="486" alt="image" src="https://github.com/user-attachments/assets/8dd29fd4-3b81-4dcf-9f1b-9cdb720e606c" />
+
 
 ⚙️ Tech Stack
 

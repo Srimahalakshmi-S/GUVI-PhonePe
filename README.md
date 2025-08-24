@@ -19,7 +19,7 @@ Interactive Visualizations using Plotly & Streamlit
 <img width="720" height="486" alt="image" src="https://github.com/user-attachments/assets/8dd29fd4-3b81-4dcf-9f1b-9cdb720e606c" />
 
 
-⚙️ Tech Stack
+Requirement used:
 
 Python (Pandas, NumPy, SQLAlchemy)
 
